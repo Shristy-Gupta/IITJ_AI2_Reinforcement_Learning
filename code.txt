@@ -1,0 +1,202 @@
+import numpy as np
+import time
+import pygame as py
+import random
+num_round = 1
+path_cost = 0
+world_rows, world_column = (8, 8)
+state_action = ['up', 'right', 'down', 'left']
+Q_Value = np.zeros((world_rows, world_column, 4))
+shristy_world = np.full((world_rows, world_column), -0.4)
+openwin= True
+goal = py.image.load('Goal.jpg')
+player = py.image.load('player.jpg')
+environment_background = py.image.load('Environment.jpg')
+screen = py.display.set_mode((512, 512))
+py.display.set_caption("Shristy Gupta M20CS015 Q-LEARNING MODEL")
+
+playerx = 0
+playery = 7 * 64
+shristy_world[3, 6] = -100
+shristy_world[4, 4] = -100
+shristy_world[5, 1] = -100
+print()
+shristy_world[4, 0] = -1
+shristy_world[4, 6] = -1
+shristy_world[5, 2] = -100
+print()
+shristy_world[5, 4] = -100
+shristy_world[6, 4] = -100
+shristy_world[6, 6] = -100
+print()
+shristy_world[6, 7] = -100
+shristy_world[7, 7] = 1
+shristy_world[0, 2] = -100
+print()
+shristy_world[1, 2] = -100
+shristy_world[2, 2] = -100
+print()
+shristy_world[3, 2] = -100
+shristy_world[1, 4] = -100
+shristy_world[1, 5] = -100
+print()
+shristy_world[3, 4] = -100
+shristy_world[3, 5] = -100
+shristy_world[1, 3] = 1
+print()
+shristy_world[2, 1] = 1
+shristy_goalx,shristy_goaly = random.randint(5, 7) * 64,random.randint(0, 2) * 64
+
+while shristy_goalx == 320 and shristy_goaly == 64:
+    shristy_goaly,shristy_goalx = random.randint(0, 128),random.randint(320, 448)
+
+print()
+goalmatcol,goalmatrow = shristy_goalx // 64,shristy_goaly // 64
+print()
+shristy_world[goalmatrow, goalmatcol] = 100
+
+def find_island(current_row_index, current_column_index):
+    state_value=shristy_world[current_row_index, current_column_index]
+    isIland = True
+    if state_value == -0.4 or state_value == -1:
+        isIland= False
+    return isIland
+
+def shristy_state_action(state_action,action_index,row_index,column_index,world_rows,world_column):
+    new_row_index, new_column_index = row_index, column_index
+    if state_action[action_index] == 'up' and row_index > 0:
+        new_row_index = new_row_index-1
+        a=1
+    elif state_action[action_index] == 'left' and column_index > 0:
+        new_column_index = new_column_index - 1
+        a=1
+    elif state_action[action_index] == 'right' and column_index < world_column - 1:
+        new_column_index = new_column_index + 1
+        a=1
+    elif state_action[action_index] == 'down' and row_index < world_rows - 1:
+        new_row_index = new_row_index + 1
+
+    return new_row_index, new_column_index
+
+def epochs(start_row, start_col):
+    for episode in range(1000):
+        a=1
+        row_index, column_index = start_row, start_col
+        a=1
+        while not find_island(row_index, column_index):
+            a=1
+            if np.random.random() < 0.9:
+                action_index = np.argmax(Q_Value[row_index, column_index])
+                a=1
+            else:
+                action_index = np.random.randint(4)
+            a=1
+            old_row_index, old_column_index = row_index, column_index
+            row_index, column_index = shristy_state_action(state_action,action_index,row_index,column_index,world_rows,world_column)
+            a=1
+            reward = shristy_world[row_index, column_index]
+            # OLD Q VALUE
+            old_q_value = Q_Value[old_row_index, old_column_index, action_index]
+            a=1
+            # TEMPORAL DIFFERENCE
+            temporal_difference = reward + (0.9 * np.max(Q_Value[row_index, column_index])) - old_q_value
+            # NEW QUEUE VALUE
+            new_q_value = old_q_value + (0.9 * temporal_difference)
+            a=1
+            Q_Value[old_row_index, old_column_index, action_index] = new_q_value
+
+def Q_Learning_Path(start_row_index, start_column_index, num_round):
+    learning_rate = 0
+    shortest_path = []
+    a=1
+    global path_cost
+    if find_island(start_row_index, start_column_index):
+        return []
+    else:
+        current_row_index, current_column_index = start_row_index, start_column_index
+        a=1
+        shortest_path.append([current_row_index, current_column_index])
+        path_cost += shristy_world[current_row_index, current_column_index]
+        a=1
+        print()
+        while not find_island(current_row_index, current_column_index) and learning_rate <= num_round:
+            if np.random.random() < 1.:
+                a=1
+                action_index = np.argmax(Q_Value[current_row_index, current_column_index])
+                a=1
+            else:
+                a=1
+                action_index = np.random.randint(4)
+            a=1
+            current_row_index, current_column_index = shristy_state_action(state_action,action_index,current_row_index,current_column_index,world_rows,world_column)
+            a=1
+            shortest_path.append([current_row_index, current_column_index])
+            a=1
+            learning_rate = learning_rate + 1
+        return shortest_path
+
+epochs(7, 0)
+shristy_Output1 = Q_Learning_Path(7, 0, num_round)
+print()
+shristy_Output2 = Q_Learning_Path(7, 0, 2)
+print()
+shristy_Output3 = Q_Learning_Path(7, 0, 3)
+print()
+shristy_Output4 = Q_Learning_Path(7, 0, 1000)
+path_cost = 0
+num_round = 1000
+epochs(3, 7)
+num_round = 1
+shristy_Output5 = Q_Learning_Path(3, 7, 1000)
+ # Preparing the main output matrix
+for path in range(len(shristy_Output5)):
+    shristy_Output4.append(shristy_Output5[path])
+
+print("FINAL PATH COST",path_cost)
+print("PATH FOLLOWED")
+step = 0
+step3 = 0
+print("ROUND 1:", shristy_Output1)
+print("ROUND 2:", shristy_Output2)
+step4 = 0
+step2 = 0
+print("ROUND 3:", shristy_Output3)
+print(":", shristy_Output4)
+case = 1
+print("KNOWLEDGE BASE")
+print(Q_Value)
+a=1
+py.init()
+
+while openwin:
+    screen.fill((0, 128, 0))
+    screen.blit(environment_background, (0, 0))
+    a=1
+    screen.blit(goal, (shristy_goalx, shristy_goaly))
+    screen.blit(player, (playerx, playery))
+    a=1
+
+    if step < len(shristy_Output1):
+        playery, playerx= shristy_Output1[step][0] * 64, shristy_Output1[step][1] * 64
+        step += 1
+        a=1
+    elif step2 < len(shristy_Output2):
+        playerx, playery = shristy_Output2[step2][1] * 64, shristy_Output2[step2][0] * 64
+        a=1
+        step2 += 1
+    elif step3 < len(shristy_Output3):
+        a=1
+        playerx, playery = shristy_Output3[step3][1] * 64, shristy_Output3[step3][0] * 64
+        step3 += 1
+    elif step4 < len(shristy_Output4):
+        playerx, playery = shristy_Output4[step4][1] * 64, shristy_Output4[step4][0] * 64
+        a=1
+        step4 += 1
+
+    for event in py.event.get():
+        if event.type == py.QUIT:
+            openwin = False
+    time.sleep(1)
+    py.display.update()
+
+
